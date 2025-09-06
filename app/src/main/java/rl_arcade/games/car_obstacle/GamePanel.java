@@ -21,7 +21,7 @@ import rl_arcade.proto.GameServiceProto.GameAction;
 // Game display panel with rendering and input handling
 public class GamePanel extends JPanel {
 
-    private GameEngine engine;
+    private GameEngine gameEngine;
     private boolean aiMode;
     private Timer gameTimer;
     private Font scoreFont;
@@ -33,8 +33,8 @@ public class GamePanel extends JPanel {
     private static final int RESET_DELAY = 2000; // 2 seconds
 
     // Initialize game panel
-    public GamePanel(GameEngine engine, boolean aiMode) {
-        this.engine = engine;
+    public GamePanel(GameEngine gameEngine, boolean aiMode) {
+        this.gameEngine = gameEngine;
         this.aiMode = aiMode;
         this.scoreFont = new Font("Arial", Font.BOLD, 20);
         this.gameOverFont = new Font("Arial", Font.BOLD, 40);
@@ -79,26 +79,26 @@ public class GamePanel extends JPanel {
                 action = GameAction.Action.DOWN;
                 break;
             case KeyEvent.VK_R:
-                if (engine.isGameOver()) {
-                    engine.reset();
+                if (gameEngine.isGameOver()) {
+                    gameEngine.reset();
                 }
         }
 
-        engine.processAction(action);
+        gameEngine.processAction(action);
     }
 
     // Start the game loop timer
     private void startGameLoop() {
         gameTimer = new Timer(Config.FRAME_TIME, e -> {
-            engine.update();
+            gameEngine.update();
 
-            if (aiMode && engine.isGameOver()) {
+            if (aiMode && gameEngine.isGameOver()) {
                 if (!waitingForReset) {
                     gameOverTime = System.currentTimeMillis();
                     waitingForReset = true;
-                    System.out.println("AI game over. Score: " + engine.getScore() + ". Resetting in 2 seconds...");
+                    System.out.println("AI game over. Score: " + gameEngine.getScore() + ". Resetting in 2 seconds...");
                 } else if (System.currentTimeMillis() - gameOverTime > RESET_DELAY) {
-                    engine.reset();
+                    gameEngine.reset();
                     waitingForReset = false;
                     System.out.println("AI game auto-reset. New game started.");
                 }
@@ -123,10 +123,10 @@ public class GamePanel extends JPanel {
         drawLanes(g2d);
 
         // Draw car
-        engine.getCar().draw(g2d); // QUESTION: how?
+        gameEngine.getCar().draw(g2d); // QUESTION: how?
 
         // Draw obstacles
-        for (Obstacle obs : engine.getObstacles()) {
+        for (Obstacle obs : gameEngine.getObstacles()) {
             obs.draw(g2d);
         }
 
@@ -134,7 +134,7 @@ public class GamePanel extends JPanel {
         drawUI(g2d);
 
         // Draw gameover screen
-        if (engine.isGameOver()) {
+        if (gameEngine.isGameOver()) {
             drawGameOver(g2d);
         }
     }
@@ -158,7 +158,7 @@ public class GamePanel extends JPanel {
         g.setFont(scoreFont);
 
         // Draw score
-        g.drawString("Score: " + engine.getScore(), 10, 30);
+        g.drawString("Score: " + gameEngine.getScore(), 10, 30);
 
         // Draw mode
         String mode = aiMode ? "AI Mode" : "Player Mode";
@@ -166,7 +166,7 @@ public class GamePanel extends JPanel {
 
         // Draw reward (for AI Mode)
         if (aiMode) {
-            g.drawString(String.format("Reward: %.2f", engine.getLastReward()), 10, 60);
+            g.drawString(String.format("Reward: %.2f", gameEngine.getLastReward()), 10, 60);
         }
     }
 
@@ -194,7 +194,7 @@ public class GamePanel extends JPanel {
                     Config.WINDOW_HEIGHT / 2 + 40);
         
         // Final score
-        String scoreText = "Final Score: " + engine.getScore();
+        String scoreText = "Final Score: " + gameEngine.getScore();
         textWidth = g.getFontMetrics().stringWidth(scoreText);
         g.drawString(scoreText, (Config.WINDOW_WIDTH - textWidth) / 2, 
                     Config.WINDOW_HEIGHT / 2 + 80);

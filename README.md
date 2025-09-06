@@ -19,6 +19,7 @@ rl_arcade/
 │                   │       ├── GameEngine.java
 │                   │       ├── GamePanel.java
 │                   │       └── Obstacle.java
+│                   │       └── CarObstacleGame.java
 │                   └── proto/        
 ├── model/                            
 │   ├── main.py                       
