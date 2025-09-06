@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package rl_arcade.proto;
+
+option java_package = "rl_arcade.proto";
+option java_outer_classname = "GameServiceProto";
+
+// Represents the current game state
+message GameState {
+    int32 car_lane = 1;  // Current lane of the car (0-4)
+    repeated ObstacleInfo obstacles = 2;  // List of obstacles
+    bool game_over = 3;  // Game status
+    int32 score = 4;  // Current score
+    float reward = 5;  // Reward for the current state
+}
+
+// Information about a single obstacle
+message ObstacleInfo {
+    int32 lane = 1;  // Lane number (0-4)
+    float y_position = 2;  // Y position (0-1, normalized)
+}
+
+// Action taken by the agent
+message GameAction {
+    enum Action {
+        STAY = 0;
+        LEFT = 1;
+        RIGHT = 2;
+        UP = 3;
+        DOWN = 4;
+    }
+    Action action = 1;
+}
+
+// Request to start a new game
+message StartGameRequest {
+    bool ai_mode = 1;  // true for AI, false for player
+    string algorithm = 2;  // "DQN" or "PPO"
+}
+
+// Response after starting a game
+message StartGameResponse {
+    bool success = 1;
+    string message = 2;
+    GameState initial_state = 3;
+}
+
+// Request for a game step
+message StepRequest {
+    GameAction action = 1;
+}
+
+// Response after a game step
+message StepResponse {
+    GameState state = 1;
+    float reward = 2;
+    bool done = 3;
+}
+
+// Training data from player mode
+message PlayerData {
+    repeated GameState states = 1;
+    repeated GameAction actions = 2;
+    repeated float rewards = 3;
+}
+
+// Service definition
+service GameService {
+    rpc StartGame(StartGameRequest) returns (StartGameResponse);
+    rpc Step(StepRequest) returns (StepResponse);
+    rpc GetState(Empty) returns (GameState);
+    rpc SendPlayerData(PlayerData) returns (Empty);
+    rpc Reset(Empty) returns (GameState);
+}
+
+message Empty {}
